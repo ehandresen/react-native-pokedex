@@ -2,19 +2,47 @@ import { View, Image, StyleSheet, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { getPokemonDetails, Pokemon } from '@/api/pokeapi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
   const [details, setDetails] = useState<Pokemon>();
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
     const load = async () => {
       const response = await getPokemonDetails(id!);
       setDetails(response);
+
+      const isFavorite = await AsyncStorage.getItem(`favorite-${id}`);
+      setIsFavorite(isFavorite === 'true');
     };
     load();
   }, [id]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Text onPress={toggleFavorite}>
+          <Ionicons
+            name={isFavorite ? 'star' : 'star-outline'}
+            size={22}
+            color="#fff"
+          />
+        </Text>
+      ),
+    });
+  }, [isFavorite]);
+
+  const toggleFavorite = async () => {
+    await AsyncStorage.setItem(
+      `favorite-${id}`,
+      !isFavorite ? 'true' : 'false'
+    );
+    setIsFavorite(!isFavorite);
+  };
 
   useEffect(() => {
     if (details) {
