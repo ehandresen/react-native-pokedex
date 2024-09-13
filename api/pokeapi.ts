@@ -1,9 +1,14 @@
 export type Pokemon = {
   name: string;
   url: string;
+  id: number;
+  image: string;
+  sprites?: any;
+  abilities?: any;
+  stats?: any;
 };
 
-export const getPokemon = async (limit = 151): Promise<Pokemon[]> => {
+export const getPokemons = async (limit = 151): Promise<Pokemon[]> => {
   const response = await fetch(
     `https://pokeapi.co/api/v2/pokemon?limit=${limit}`
   );
@@ -17,4 +22,11 @@ export const getPokemon = async (limit = 151): Promise<Pokemon[]> => {
       index + 1
     }.png`,
   }));
+};
+
+export const getPokemonDetails = async (id: string): Promise<Pokemon> => {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+
+  const data = await response.json();
+  return data;
 };
